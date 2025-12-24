@@ -13,14 +13,13 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const brand = url.searchParams.get('brand')
-    const model = url.searchParams.get('model')
-    const year = url.searchParams.get('year')
+    const brand = url.searchParams.get('brand') // Partial match on Name or Slug
+    const model = url.searchParams.get('model') // Partial match on Name
+    const year = url.searchParams.get('year')   // Exact match
     const limit = parseInt(url.searchParams.get('limit') || '20')
     const offset = parseInt(url.searchParams.get('offset') || '0')
 
     // Initialize Supabase Client
-    // process.env is not available in Deno, use Deno.env.get
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 
@@ -28,7 +27,9 @@ Deno.serve(async (req) => {
       db: { schema: 'open_egypt' }
     })
 
-    // Build Query
+    // 1. Start building the query
+    // We use !inner joins to ensure we can filter by nested columns (brand/model names)
+    // This assumes strict referential integrity (every price has a variant->model->brand), which is true in our schema.
     let query = supabase
       .from('price_entries')
       .select(`
@@ -38,13 +39,13 @@ Deno.serve(async (req) => {
         currency,
         type,
         valid_from,
-        variant:variants (
+        variant:variants!inner (
           name_en,
           name_ar,
-          model:models (
+          model:models!inner (
             name_en,
             name_ar,
-            brand:brands (
+            brand:brands!inner (
               name_en,
               name_ar,
               slug,
@@ -53,47 +54,36 @@ Deno.serve(async (req) => {
           )
         )
       `)
-      .range(offset, offset + limit - 1)
-      .order('valid_from', { ascending: false })
-
-    // Apply Filters
+      
+    // 2. Apply Filters
     if (brand) {
-      // We need to filter by brand slug or name. 
-      // Supabase inner joins filtering is tricky with dot syntax,
-      // but 'variant.model.brand.slug' eq 'brand' works in recent versions if correctly mapped.
-      // Alternatively, we filter strictly if we had brand_id on price_entries (denormalization).
-      // For now, let's try the deep filter syntax or keep it simple.
-      // Deep filtering: !inner ensures the join happens and filters rows.
-      query = supabase
-        .from('price_entries')
-        .select(`
-          *,
-          variant:variants!inner (
-            model:models!inner (
-              brand:brands!inner (
-                slug
-              )
-            )
-          )
-        `)
-        .eq('variant.model.brand.slug', brand)
+      // Partial match on English Name OR Slug
+      // Uses the 'foreignTable' option to scope the OR clause to the joined brand table
+      query = query.or(`name_en.ilike.%${brand}%,slug.ilike.%${brand}%`, { foreignTable: 'variant.model.brand' })
     }
-    
-    // Simplification for the MVP:
-    // The query above with strict typing in the response might be complex to reconstruct.
-    // Let's stick to the select and see if we can filter.
-    // If filtering by related tables is hard without !inner, we might return all and filter in memory (bad for perf)
-    // or properly use !inner for the filter condition.
+
+    if (model) {
+      // Partial match on Model English Name
+      query = query.ilike('variant.model.name_en', `%${model}%`)
+    }
 
     if (year) {
       query = query.eq('year_model', year)
     }
 
+    // 3. Sorting & Pagination
+    // "Relevance" in this context is interpreted as "Newest Models" and "Newest Pricing".
+    query = query
+      .order('year_model', { ascending: false })
+      .order('valid_from', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    // 4. Execute
     const { data, error } = await query
 
     if (error) throw error
 
-    // Transformation: Flatten the structure for the public API
+    // 5. Transform Response
     const flatData = data.map((entry: any) => ({
       id: entry.id,
       price: entry.price_amount,
@@ -101,9 +91,12 @@ Deno.serve(async (req) => {
       year: entry.year_model,
       brand: entry.variant?.model?.brand?.name_en,
       brand_ar: entry.variant?.model?.brand?.name_ar,
+      brand_slug: entry.variant?.model?.brand?.slug,
+      brand_logo: entry.variant?.model?.brand?.logo_url,
       model: entry.variant?.model?.name_en,
       model_ar: entry.variant?.model?.name_ar,
       variant: entry.variant?.name_en,
+      variant_ar: entry.variant?.name_ar,
       type: entry.type,
       date: entry.valid_from
     }))
@@ -113,7 +106,8 @@ Deno.serve(async (req) => {
       meta: {
         limit,
         offset,
-        count: flatData.length
+        count: flatData.length,
+        filters: { brand, model, year }
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
