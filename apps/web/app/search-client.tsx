@@ -88,7 +88,11 @@ export default function SearchClient() {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontWeight: '800', fontSize: '1.2rem', color: '#2e7d32' }}>
-                    {new Intl.NumberFormat('en-EG', { style: 'currency', currency: 'EGP' }).format(car.price)}
+                    {new Intl.NumberFormat('en-EG', { 
+                      style: 'currency', 
+                      currency: 'EGP',
+                      maximumFractionDigits: 0 
+                    }).format(car.price)}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#999' }}>
                     {new Date(car.date).toLocaleDateString()}

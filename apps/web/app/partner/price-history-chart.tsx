@@ -27,10 +27,10 @@ export function PriceHistoryChart({ data }: PriceHistoryChartProps) {
           <XAxis dataKey="formattedDate" tick={{ fontSize: 12 }} />
           <YAxis 
             tick={{ fontSize: 12 }} 
-            tickFormatter={(value) => `${value / 1000}k`}
+            tickFormatter={(value) => new Intl.NumberFormat('en-EG', { notation: 'compact' }).format(value)}
           />
           <Tooltip 
-            formatter={(value: any) => [`EGP ${Number(value).toLocaleString()}`, 'Price']}
+            formatter={(value: any) => [`EGP ${Number(value).toLocaleString('en-EG', { maximumFractionDigits: 0 })}`, 'Price']}
             labelStyle={{ color: 'black' }}
           />
           <Line type="monotone" dataKey="price" stroke="#2563eb" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />

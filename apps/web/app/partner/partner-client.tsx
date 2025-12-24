@@ -65,6 +65,15 @@ export default function PartnerClient() {
 
   // -- API Helpers --
 
+  const formatPrice = (val: string | number) => {
+    if (val === '' || val === undefined) return ''
+    const num = typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, ''), 10) : Math.floor(val)
+    if (isNaN(num)) return ''
+    return new Intl.NumberFormat('en-EG', { maximumFractionDigits: 0 }).format(num)
+  }
+
+  const unformatPrice = (val: string) => val.replace(/[^0-9]/g, '')
+
   const apiCall = async (method: 'GET' | 'POST', body?: any, keyOverride?: string) => {
     const key = keyOverride || apiKey
     const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/partner-portal`, {
@@ -271,13 +280,13 @@ export default function PartnerClient() {
                 <td style={{ padding: '1rem', fontWeight: 'bold' }}>
                   {editingId === row.id ? (
                     <input 
-                      type="number" 
-                      value={editPrice} 
-                      onChange={e => setEditPrice(e.target.value)}
-                      style={{ padding: '0.4rem', width: '100px' }}
+                      type="text" 
+                      value={formatPrice(editPrice)} 
+                      onChange={e => setEditPrice(unformatPrice(e.target.value))}
+                      style={{ padding: '0.4rem', width: '120px' }}
                     />
                   ) : (
-                    new Intl.NumberFormat('en-EG').format(row.price_amount)
+                    new Intl.NumberFormat('en-EG', { maximumFractionDigits: 0 }).format(row.price_amount)
                   )}
                 </td>
                 <td style={{ padding: '1rem', color: '#888', fontSize: '0.9rem' }}>
@@ -376,11 +385,11 @@ export default function PartnerClient() {
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price (EGP)</label>
                 <input 
-                  type="number" 
-                  value={newListing.price}
-                  onChange={(e) => setNewListing({ ...newListing, price: e.target.value })}
+                  type="text" 
+                  value={formatPrice(newListing.price)}
+                  onChange={(e) => setNewListing({ ...newListing, price: unformatPrice(e.target.value) })}
                   style={{ width: '100%', padding: '0.5rem' }}
-                  placeholder="e.g. 5000000"
+                  placeholder="e.g. 5,000,000"
                 />
               </div>
             </div>
