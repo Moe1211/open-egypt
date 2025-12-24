@@ -33,29 +33,84 @@ Deno.serve(async (req) => {
 
     // Smart Search Logic
     if (q && !brandParam && !modelParam) {
-      // 1. Fetch all brands to detect if query contains a brand
+      // 1. Fetch all brands
       const { data: allBrands } = await supabase
         .from('brands')
         .select('name_en, slug, name_ar')
       
       if (allBrands) {
-        // Sort by length desc to match "Land Rover" before "Land"
+        // Sort by length desc to prioritize "Land Rover" over "Land"
         const sortedBrands = allBrands.sort((a, b) => b.name_en.length - a.name_en.length)
         const lowerQ = q.toLowerCase()
-        
-        const matchedBrand = sortedBrands.find(b => 
+        const tokens = lowerQ.split(/\s+/).filter(t => t.length > 0)
+
+        // Strategy A: Check if query *contains* a full brand name (e.g. "Audi A3")
+        let matchedBrand = sortedBrands.find(b => 
           lowerQ.includes(b.name_en.toLowerCase()) || 
           lowerQ.includes(b.slug.toLowerCase()) ||
           (b.name_ar && lowerQ.includes(b.name_ar))
         )
 
+        // Strategy B: Check if brand *starts with* the query (e.g. "Aud", "Land Ro")
+        if (!matchedBrand) {
+          matchedBrand = sortedBrands.find(b => 
+            b.name_en.toLowerCase().startsWith(lowerQ) ||
+            b.slug.toLowerCase().startsWith(lowerQ)
+          )
+        }
+
+        // Strategy C: Token Matching (e.g. "Aud A3" -> "Aud" matches "Audi")
+        // We look for a token that looks like a brand prefix (min 3 chars)
+        if (!matchedBrand) {
+          for (const token of tokens) {
+            if (token.length < 3) continue; // Skip short tokens like "A3", "GT"
+            
+            const tokenMatch = sortedBrands.find(b => 
+              b.name_en.toLowerCase().startsWith(token) ||
+              b.slug.toLowerCase().startsWith(token)
+            )
+            
+            if (tokenMatch) {
+              matchedBrand = tokenMatch
+              break // Take the first strong match
+            }
+          }
+        }
+
         if (matchedBrand) {
-          filterBrand = matchedBrand.slug // Use slug for consistent filtering
-          // Remove brand from query to get model
-          // specific regex to remove the brand name/slug and clean up spaces
-          const brandNameRegex = new RegExp(matchedBrand.name_en, 'i')
-          const brandSlugRegex = new RegExp(matchedBrand.slug, 'i')
-          let remainder = q.replace(brandNameRegex, '').replace(brandSlugRegex, '').trim()
+          filterBrand = matchedBrand.slug
+          
+          // Remove the matched part from the query to isolate the model
+          // We need to be careful to remove the *token* or the *phrase* that matched.
+          
+          let remainder = lowerQ
+          
+          // Try removing the full name first
+          const nameRegex = new RegExp(`\\b${matchedBrand.name_en}\\b`, 'i')
+          if (nameRegex.test(remainder)) {
+            remainder = remainder.replace(nameRegex, '')
+          } else {
+            // Try removing the slug
+             const slugRegex = new RegExp(`\\b${matchedBrand.slug}\\b`, 'i')
+             if (slugRegex.test(remainder)) {
+               remainder = remainder.replace(slugRegex, '')
+             } else {
+                // Remove the matching token(s) if full name didn't match (Strategy C)
+                // This is a bit rough, but if we matched "Aud" for "Audi", we want to remove "Aud"
+                // We'll reconstruct remainder from tokens excluding the one that matched the brand
+                // But re-matching to find WHICH token matched is safer.
+                
+                const matchedToken = tokens.find(t => 
+                   t.length >= 3 && (matchedBrand!.name_en.toLowerCase().startsWith(t) || matchedBrand!.slug.toLowerCase().startsWith(t))
+                )
+                
+                if (matchedToken) {
+                   remainder = remainder.replace(matchedToken, '')
+                }
+             }
+          }
+          
+          remainder = remainder.replace(/\s+/g, ' ').trim()
           
           if (remainder.length > 0) {
             filterModel = remainder
@@ -65,7 +120,6 @@ Deno.serve(async (req) => {
           filterModel = q
         }
       } else {
-         // Fallback if brands fetch fails
          filterModel = q
       }
     }
