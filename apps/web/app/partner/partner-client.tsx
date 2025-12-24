@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { LineChart as ChartIcon, X } from 'lucide-react'
+import { PriceHistoryChart } from './price-history-chart'
 
 type PriceEntry = {
   id: string;
@@ -31,6 +33,12 @@ export default function PartnerClient() {
   // Edit State
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editPrice, setEditPrice] = useState<string>('')
+
+  // History State
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [historyData, setHistoryData] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
 
   // Add Listing State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -103,6 +111,24 @@ export default function PartnerClient() {
     setPartnerName('')
     setData([])
     localStorage.removeItem('open_egypt_partner_key')
+  }
+
+  // -- History Logic --
+
+  const handleViewHistory = async (id: string) => {
+    setSelectedHistoryId(id)
+    setHistoryModalOpen(true)
+    setLoadingHistory(true)
+    setHistoryData([])
+    
+    try {
+      const res = await apiCall('POST', { action: 'get_price_history', payload: { entry_id: id } })
+      setHistoryData(res.data)
+    } catch (e: any) {
+      alert(e.message)
+    } finally {
+      setLoadingHistory(false)
+    }
   }
 
   // -- Add Listing Logic --
@@ -264,15 +290,24 @@ export default function PartnerClient() {
                       <button onClick={() => setEditingId(null)} style={{ background: '#c62828', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}>X</button>
                     </div>
                   ) : (
-                    <button 
-                      onClick={() => {
-                        setEditingId(row.id)
-                        setEditPrice(row.price_amount.toString())
-                      }}
-                      style={{ background: '#f5f5f5', border: '1px solid #ccc', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Edit
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        onClick={() => {
+                          setEditingId(row.id)
+                          setEditPrice(row.price_amount.toString())
+                        }}
+                        style={{ background: '#f5f5f5', border: '1px solid #ccc', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleViewHistory(row.id)}
+                        title="View Price History"
+                        style={{ background: '#e3f2fd', color: '#1565c0', border: '1px solid #90caf9', padding: '0.4rem 0.6rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      >
+                        <ChartIcon size={16} />
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
@@ -365,6 +400,31 @@ export default function PartnerClient() {
                 {loading ? 'Adding...' : 'Add Listing'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* History Modal */}
+      {historyModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 50
+        }}>
+          <div style={{ background: '#fff', padding: '2rem', borderRadius: '12px', width: '600px', maxWidth: '90%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ marginTop: 0 }}>Price History</h2>
+              <button onClick={() => setHistoryModalOpen(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            {loadingHistory ? (
+              <p>Loading history...</p>
+            ) : historyData.length === 0 ? (
+              <p>No price changes recorded yet.</p>
+            ) : (
+              <PriceHistoryChart data={historyData} />
+            )}
           </div>
         </div>
       )}

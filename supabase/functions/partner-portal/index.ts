@@ -104,6 +104,66 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ data: [] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
+      if (action === 'get_price_history') {
+        const { entry_id } = payload
+
+        if (!entry_id) {
+          return new Response(JSON.stringify({ error: 'Missing entry_id' }), { status: 400, headers: corsHeaders })
+        }
+
+        // Verify ownership
+        const { data: entry, error: entryError } = await supabaseAdmin
+          .from('price_entries')
+          .select('price_amount, created_at')
+          .eq('id', entry_id)
+          .eq('partner_id', partnerId)
+          .single()
+
+        if (entryError || !entry) {
+          return new Response(JSON.stringify({ error: 'Entry not found or unauthorized' }), { status: 404, headers: corsHeaders })
+        }
+
+        // Fetch logs
+        const { data: logs, error: logsError } = await supabaseAdmin
+          .from('price_change_logs')
+          .select('old_price, new_price, created_at')
+          .eq('price_entry_id', entry_id)
+          .order('created_at', { ascending: true })
+
+        if (logsError) throw logsError
+
+        // Construct history array
+        // Start with the initial price if logs exist, otherwise just current
+        // Actually, logs contain old_price and new_price. 
+        // We can map logs to points.
+        
+        const history = logs.map((log: any) => ({
+          date: log.created_at,
+          price: log.new_price
+        }))
+
+        // Add current state as the latest point (if not already covered by last log, effectively it is the last log's new_price, but let's be sure)
+        // If there are no logs, the only history is the creation time and current price.
+        if (history.length === 0) {
+           history.push({ date: entry.created_at, price: entry.price_amount })
+        } else {
+           // Ensure the very first "old_price" is represented? 
+           // Yes, the first log's old_price was the price before the first change.
+           const firstLog = logs[0]
+           if (firstLog.old_price) {
+             history.unshift({
+               date: firstLog.created_at, // Ideally this would be the *previous* timestamp, but we might not have it easily. We'll use the change time for now or look for creation time.
+               price: firstLog.old_price
+             })
+           }
+        }
+
+        return new Response(JSON.stringify({ data: history }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        })
+      }
+
       if (action === 'create_listing') {
         const { variant_id, year_model, price_amount } = payload
 
