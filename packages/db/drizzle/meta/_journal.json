@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1766574787465,
+      "tag": "0000_long_gamma_corps",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1766574995529,
+      "tag": "0001_thick_tarot",
+      "breakpoints": true
+    }
+  ]
+}
