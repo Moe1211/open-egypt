@@ -1,0 +1,1 @@
+ALTER TABLE "open_egypt"."price_entries" ADD COLUMN "created_at" timestamp DEFAULT now();

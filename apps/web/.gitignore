@@ -7,3 +7,6 @@ node_modules/
 
 README.md
 ROADMAP.md
+
+.DS_Store
+

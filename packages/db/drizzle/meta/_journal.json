@@ -15,6 +15,20 @@
       "when": 1766574995529,
       "tag": "0001_thick_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1766580883275,
+      "tag": "0002_boring_monster_badoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1766581771580,
+      "tag": "0003_glossy_veda",
+      "breakpoints": true
     }
   ]
 }

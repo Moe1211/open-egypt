@@ -1,6 +1,17 @@
 import { supabase } from '@/lib/supabase';
 import SearchClient from '../search-client';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Car Prices Database | Open Egypt",
+  description: "Browse live car market prices in Egypt. Real-time data aggregated from major market sources.",
+  openGraph: {
+    title: "Car Prices Database | Open Egypt",
+    description: "Browse live car market prices in Egypt. Real-time data aggregated from major market sources.",
+    url: "/prices",
+  },
+};
 
 // Revalidate data every 60 seconds (ISR)
 export const revalidate = 60;
