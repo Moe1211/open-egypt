@@ -21,8 +21,8 @@ export default function SearchClient() {
 
       setLoading(true)
       try {
-        // Search by model name mostly, or brand if typed
-        const data = await searchCarPrices({ model: query, limit: 10 })
+        // Search by generic query 'q' which handles brand or model
+        const data = await searchCarPrices({ q: query, limit: 10 })
         setResults(data)
         setHasSearched(true)
       } finally {

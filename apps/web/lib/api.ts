@@ -16,6 +16,7 @@ export interface CarPrice {
 }
 
 export interface SearchParams {
+  q?: string
   brand?: string
   model?: string
   year?: string
@@ -27,6 +28,7 @@ const EDGE_FUNCTION_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/
 
 export async function searchCarPrices(params: SearchParams): Promise<CarPrice[]> {
   const query = new URLSearchParams()
+  if (params.q) query.set('q', params.q)
   if (params.brand) query.set('brand', params.brand)
   if (params.model) query.set('model', params.model)
   if (params.year) query.set('year', params.year)

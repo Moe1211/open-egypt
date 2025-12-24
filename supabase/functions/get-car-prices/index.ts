@@ -13,8 +13,9 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const brand = url.searchParams.get('brand') // Partial match on Name or Slug
-    const model = url.searchParams.get('model') // Partial match on Name
+    const q = url.searchParams.get('q')?.trim()
+    const brandParam = url.searchParams.get('brand') // Partial match on Name or Slug
+    const modelParam = url.searchParams.get('model') // Partial match on Name
     const year = url.searchParams.get('year')   // Exact match
     const limit = parseInt(url.searchParams.get('limit') || '20')
     const offset = parseInt(url.searchParams.get('offset') || '0')
@@ -26,6 +27,48 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       db: { schema: 'open_egypt' }
     })
+
+    let filterBrand = brandParam
+    let filterModel = modelParam
+
+    // Smart Search Logic
+    if (q && !brandParam && !modelParam) {
+      // 1. Fetch all brands to detect if query contains a brand
+      const { data: allBrands } = await supabase
+        .from('brands')
+        .select('name_en, slug, name_ar')
+      
+      if (allBrands) {
+        // Sort by length desc to match "Land Rover" before "Land"
+        const sortedBrands = allBrands.sort((a, b) => b.name_en.length - a.name_en.length)
+        const lowerQ = q.toLowerCase()
+        
+        const matchedBrand = sortedBrands.find(b => 
+          lowerQ.includes(b.name_en.toLowerCase()) || 
+          lowerQ.includes(b.slug.toLowerCase()) ||
+          (b.name_ar && lowerQ.includes(b.name_ar))
+        )
+
+        if (matchedBrand) {
+          filterBrand = matchedBrand.slug // Use slug for consistent filtering
+          // Remove brand from query to get model
+          // specific regex to remove the brand name/slug and clean up spaces
+          const brandNameRegex = new RegExp(matchedBrand.name_en, 'i')
+          const brandSlugRegex = new RegExp(matchedBrand.slug, 'i')
+          let remainder = q.replace(brandNameRegex, '').replace(brandSlugRegex, '').trim()
+          
+          if (remainder.length > 0) {
+            filterModel = remainder
+          }
+        } else {
+          // No brand matched, assume it's a model search
+          filterModel = q
+        }
+      } else {
+         // Fallback if brands fetch fails
+         filterModel = q
+      }
+    }
 
     // 1. Start building the query
     // We use !inner joins to ensure we can filter by nested columns (brand/model names)
@@ -56,15 +99,15 @@ Deno.serve(async (req) => {
       `)
       
     // 2. Apply Filters
-    if (brand) {
+    if (filterBrand) {
       // Partial match on English Name OR Slug
       // Uses the 'foreignTable' option to scope the OR clause to the joined brand table
-      query = query.or(`name_en.ilike.%${brand}%,slug.ilike.%${brand}%`, { foreignTable: 'variant.model.brand' })
+      query = query.or(`name_en.ilike.%${filterBrand}%,slug.ilike.%${filterBrand}%`, { foreignTable: 'variant.model.brand' })
     }
 
-    if (model) {
+    if (filterModel) {
       // Partial match on Model English Name
-      query = query.ilike('variant.model.name_en', `%${model}%`)
+      query = query.ilike('variant.model.name_en', `%${filterModel}%`)
     }
 
     if (year) {
@@ -107,7 +150,7 @@ Deno.serve(async (req) => {
         limit,
         offset,
         count: flatData.length,
-        filters: { brand, model, year }
+        filters: { q, brand: filterBrand, model: filterModel, year }
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
