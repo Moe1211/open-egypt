@@ -84,6 +84,16 @@ export default function DeveloperPortal() {
     if (error) {
       alert('Error creating account: ' + error.message)
     } else {
+      // Notify Admin for Approval
+      await supabase.functions.invoke('telegram-bot', {
+        body: {
+          action: 'request_approval',
+          partnerName: partnerName,
+          partnerId: data.id,
+          tier: 'Account Signup',
+          userEmail: user.email
+        }
+      })
       fetchPartnerData(user.id)
     }
     setLoading(false)
@@ -118,6 +128,28 @@ export default function DeveloperPortal() {
       }
     } catch (err: any) {
       alert('Failed to generate key: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resendApproval = async () => {
+    if (!partner || !user) return
+    setLoading(true)
+    try {
+      const { error } = await supabase.functions.invoke('telegram-bot', {
+        body: {
+          action: 'request_approval',
+          partnerName: partner.name,
+          partnerId: partner.id,
+          tier: 'Account Signup (Retry)',
+          userEmail: user.email
+        }
+      })
+      if (error) throw error
+      alert('Approval request sent!')
+    } catch (err: any) {
+      alert('Failed to send request: ' + err.message)
     } finally {
       setLoading(false)
     }
@@ -213,6 +245,17 @@ export default function DeveloperPortal() {
               {partner.status}
             </div>
           </div>
+          
+          {partner.status === 'PENDING' && (
+            <div className="flex justify-end">
+              <button 
+                onClick={resendApproval}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Resend Approval Request
+              </button>
+            </div>
+          )}
 
           {/* New Key Modal */}
           {newKey && (
