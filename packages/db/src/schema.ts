@@ -1,4 +1,4 @@
-import { pgSchema, uuid, text, integer, decimal, timestamp, boolean, jsonb } from 'drizzle-orm/pg-core';
+import { pgSchema, uuid, text, integer, decimal, timestamp, boolean, jsonb, unique, index, date } from 'drizzle-orm/pg-core';
 
 export const openEgyptSchema = pgSchema('open_egypt');
 
@@ -88,3 +88,20 @@ export const priceChangeLogs = openEgyptSchema.table('price_change_logs', {
   changedByPartnerId: uuid('changed_by_partner_id').references(() => partners.id),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+
+    export const priceChangesReport = openEgyptSchema.table('price_changes_report', {
+      id: uuid('id').defaultRandom().primaryKey(),
+      brandId: uuid('brand_id').references(() => brands.id, { onDelete: 'cascade' }).notNull
+  (),
+      brandName: text('brand_name').notNull(),
+      reportDate: date('report_date').notNull(),
+      newEntries: integer('new_entries').default(0).notNull(),
+      updatedEntries: integer('updated_entries').default(0).notNull(),
+      createdAt: timestamp('created_at').defaultNow().notNull(),
+    }, (table) => {
+     return {
+       brandDateUnique: unique('brand_date_unique').on(table.brandId, table.reportDate),
+       dateIdx: index('report_date_idx').on(table.reportDate),
+     };
+   });
