@@ -1,6 +1,14 @@
-import { pgSchema, uuid, text, integer, decimal, timestamp, boolean, jsonb, unique, index, date } from 'drizzle-orm/pg-core';
+import { pgSchema, uuid, text, integer, decimal, timestamp, boolean, jsonb, unique, index, date, primaryKey } from 'drizzle-orm/pg-core';
 
 export const openEgyptSchema = pgSchema('open_egypt');
+
+// -- API Tiers & Config --
+
+export const apiTiers = openEgyptSchema.table('api_tiers', {
+  id: text('id').primaryKey(), // 'free', 'partner', 'enterprise'
+  requestsPerHour: integer('requests_per_hour').notNull(),
+  description: text('description'),
+});
 
 export const brands = openEgyptSchema.table('brands', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -52,20 +60,34 @@ export const partners = openEgyptSchema.table('partners', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
-  status: text('status').default('ACTIVE').notNull(), // ACTIVE, REVOKED
+  status: text('status').default('PENDING').notNull(), // PENDING, ACTIVE, REVOKED, REJECTED
+  type: text('type').default('DEVELOPER').notNull(), // DEALER, DEVELOPER
   contactInfo: jsonb('contact_info'),
+  ownerUserId: uuid('owner_user_id'), // Link to Supabase Auth User ID
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const apiKeys = openEgyptSchema.table('api_keys', {
   id: uuid('id').defaultRandom().primaryKey(),
   partnerId: uuid('partner_id').references(() => partners.id).notNull(),
+  tierId: text('tier_id').references(() => apiTiers.id).default('free'),
+  name: text('name'), // User-friendly name e.g. "My App"
   keyHash: text('key_hash').notNull(),
   prefix: text('prefix').notNull(), // Store first 8 chars for display
   createdAt: timestamp('created_at').defaultNow(),
   lastUsedAt: timestamp('last_used_at'),
   isRevoked: boolean('is_revoked').default(false),
 });
+
+export const apiUsage = openEgyptSchema.table('api_usage', {
+  keyId: uuid('key_id').references(() => apiKeys.id).notNull(),
+  hourBucket: timestamp('hour_bucket').notNull(),
+  count: integer('count').default(0).notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.keyId, table.hourBucket] }),
+}));
+
+// -- Audit & Logs --
 
 // -- Audit & Logs --
 

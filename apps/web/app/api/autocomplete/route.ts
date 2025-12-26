@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-api-key': process.env.SHOWCASE_API_KEY || '',
       },
     })
 

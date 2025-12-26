@@ -1,8 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { guardApiKey } from '../_shared/api-guard.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
 }
 
 Deno.serve(async (req) => {
@@ -12,6 +13,20 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // 1. API Guard (Rate Limit & Auth)
+    const guard = await guardApiKey(req)
+    if (!guard.allowed) {
+      return new Response(JSON.stringify({ error: guard.error }), {
+        status: guard.status,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': guard.limit?.toString() ?? '',
+          'X-RateLimit-Remaining': guard.limit && guard.usage ? (guard.limit - guard.usage).toString() : ''
+        }
+      })
+    }
+
     const url = new URL(req.url)
     const q = url.searchParams.get('q')?.trim()
     const brandParam = url.searchParams.get('brand') // Partial match on Name or Slug

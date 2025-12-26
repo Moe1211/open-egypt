@@ -20,6 +20,7 @@ export async function GET(request: Request) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'x-api-key': process.env.SHOWCASE_API_KEY || '',
       },
     })
 
@@ -30,8 +31,8 @@ export async function GET(request: Request) {
     const data = await res.json()
     return NextResponse.json(data)
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Prices Proxy Error:', error)
-    return NextResponse.json({ data: [], error: error.message }, { status: 500 })
+    return NextResponse.json({ data: [], error: error?.message }, { status: 500 })
   }
 }
