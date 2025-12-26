@@ -43,6 +43,13 @@
       "when": 1766753158657,
       "tag": "0005_lonely_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1766756197984,
+      "tag": "0006_wet_ego",
+      "breakpoints": true
     }
   ]
 }

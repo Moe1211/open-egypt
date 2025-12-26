@@ -1,4 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://open-egypt.vercel.app"),
@@ -58,13 +62,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
       <head>
         <script
           type="application/ld+json"
@@ -83,8 +89,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body style={{ fontFamily: 'system-ui, sans-serif', margin: 0, padding: 0 }}>
+      <body className={inter.className}>
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

@@ -1,99 +1,160 @@
-import Link from 'next/link';
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ArrowRight, Github, Database, Cpu, Layout, BookOpen, Terminal } from 'lucide-react'
 
 export default function Home() {
   return (
-    <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem', fontFamily: 'system-ui, sans-serif', lineHeight: '1.6' }}>
-      {/* Hero Section */}
-      <header style={{ marginBottom: '4rem', textAlign: 'center', padding: '4rem 0', background: 'linear-gradient(to bottom, #ffffff, #f9fafb)', borderRadius: '24px', border: '1px solid #f0f0f0' }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: '900', margin: '0 0 1rem 0', letterSpacing: '-0.05em' }}>
-          Open Egypt
-        </h1>
-        <p style={{ fontSize: '1.5rem', color: '#666', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
-          The "Shadow" Open Data Infrastructure for Egypt.
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link href="/prices" style={{ 
-            background: '#000', 
-            color: '#fff', 
-            padding: '0.8rem 1.5rem', 
-            borderRadius: '8px', 
-            textDecoration: 'none', 
-            fontWeight: '600',
-            transition: 'opacity 0.2s'
-          }}>
-            Search Car Prices →
-          </Link>
-          <a href="https://github.com/Moe1211/open-egypt" target="_blank" style={{ 
-            background: '#fff', 
-            color: '#000', 
-            border: '1px solid #e0e0e0', 
-            padding: '0.8rem 1.5rem', 
-            borderRadius: '8px', 
-            textDecoration: 'none', 
-            fontWeight: '600' 
-          }}>
-            View on GitHub
-          </a>
-        </div>
-      </header>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
-        {/* Module: Car Prices */}
-        <div style={{ padding: '2rem', border: '1px solid #eee', borderRadius: '16px', background: '#fff' }}>
-          <h2 style={{ marginTop: '0', fontSize: '1.5rem' }}>🚗 Car Prices API</h2>
-          <p style={{ color: '#666' }}>
-            A public, transparent API for automotive pricing in Egypt. Aggregated from major market sources.
-          </p>
-          <ul style={{ color: '#555', paddingLeft: '1.2rem' }}>
-            <li>Real-time market data</li>
-            <li>Historical price tracking</li>
-            <li>Brand & Model aggregation</li>
-          </ul>
-          <div style={{ marginTop: '1.5rem' }}>
-             <code style={{ background: '#f5f5f5', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.9rem' }}>GET /functions/v1/get-car-prices</code>
-          </div>
-        </div>
-
-        {/* Module: Architecture */}
-        <div style={{ padding: '2rem', border: '1px solid #eee', borderRadius: '16px', background: '#fff' }}>
-          <h2 style={{ marginTop: '0', fontSize: '1.5rem' }}>🏗️ Architecture</h2>
-          <p style={{ color: '#666' }}>
-            Built on a "Supabase Native" stack to ensure zero maintenance and infinite scalability.
-          </p>
-          <ul style={{ color: '#555', paddingLeft: '1.2rem' }}>
-            <li><strong>Database:</strong> PostgreSQL (Open Egypt Schema)</li>
-            <li><strong>Logic:</strong> Edge Functions (Deno)</li>
-            <li><strong>Frontend:</strong> Next.js App Router</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Documentation Preview */}
-      <section style={{ marginBottom: '4rem' }}>
-        <h2 style={{ fontSize: '2rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Documentation</h2>
+    <div className="min-h-screen selection:bg-primary/20">
+      <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
         
-        <div style={{ marginTop: '2rem' }}>
-          <h3 style={{ fontSize: '1.3rem' }}>Project Philosophy</h3>
-          <p>
-            "If the data doesn't exist, we build it." Open Egypt is an initiative to digitize the missing public infrastructure. 
-            We do not wait for official APIs. We scrape, aggregate, and normalize data into a public good.
-          </p>
+        {/* Hero Section */}
+        <header className="mb-20 text-center space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
+              Open Egypt
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              The "Shadow" Open Data Infrastructure for Egypt.
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/prices">
+                Search Car Prices <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <a href="https://github.com/Moe1211/open-egypt" target="_blank" rel="noopener noreferrer">
+                <Github className="mr-2 w-4 h-4" /> View on GitHub
+              </a>
+            </Button>
+          </div>
+        </header>
 
-          <h3 style={{ fontSize: '1.3rem', marginTop: '2rem' }}>For Developers</h3>
-          <p>
-            This project enforces strict <strong>Zero Technical Debt</strong> policies.
-          </p>
-          <ul style={{ lineHeight: '1.8' }}>
-            <li><strong>Monorepo:</strong> Managed with PNPM Workspaces.</li>
-            <li><strong>Type Safety:</strong> 100% TypeScript. Shared types between DB and Web.</li>
-            <li><strong>Migrations:</strong> Manual SQL review process. No automatic schema drifts.</li>
-          </ul>
+        {/* Modules Grid */}
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
+          {/* Module: Car Prices */}
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <span className="text-2xl">🚗</span> Car Prices API
+              </CardTitle>
+              <CardDescription className="text-base">
+                A public, transparent API for automotive pricing in Egypt. Aggregated from major market sources.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                  Real-time market data
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                  Historical price tracking
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                  Brand & Model aggregation
+                </li>
+              </ul>
+              <div className="pt-2">
+                 <code className="bg-muted px-3 py-1.5 rounded-md text-sm font-mono block w-fit">
+                   GET /functions/v1/get-car-prices
+                 </code>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Module: Architecture */}
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <span className="text-2xl">🏗️</span> Architecture
+              </CardTitle>
+              <CardDescription className="text-base">
+                Built on a "Supabase Native" stack to ensure zero maintenance and infinite scalability.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-background border border-border">
+                  <Database className="w-5 h-5 text-blue-400 mt-0.5" />
+                  <div>
+                    <strong className="block text-sm">Database</strong>
+                    <span className="text-muted-foreground text-sm">PostgreSQL (Open Egypt Schema)</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-background border border-border">
+                  <Cpu className="w-5 h-5 text-amber-400 mt-0.5" />
+                  <div>
+                    <strong className="block text-sm">Logic</strong>
+                    <span className="text-muted-foreground text-sm">Edge Functions (Deno)</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-background border border-border">
+                  <Layout className="w-5 h-5 text-purple-400 mt-0.5" />
+                  <div>
+                    <strong className="block text-sm">Frontend</strong>
+                    <span className="text-muted-foreground text-sm">Next.js App Router</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </section>
 
-      <footer style={{ marginTop: '4rem', color: '#999', fontSize: '0.9rem', borderTop: '1px solid #eee', paddingTop: '2rem', textAlign: 'center' }}>
-        <p>© 2025 Open Egypt Initiative. Open Source.</p>
-      </footer>
-    </main>
-  );
+        {/* Documentation Section */}
+        <section className="space-y-12 border-t pt-20">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-8 h-8" />
+            <h2 className="text-3xl font-bold">Documentation</h2>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-12">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                Project Philosophy
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                "If the data doesn't exist, we build it." Open Egypt is an initiative to digitize the missing public infrastructure. 
+                We do not wait for official APIs. We scrape, aggregate, and normalize data into a public good.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                For Developers
+              </h3>
+              <p className="text-muted-foreground">
+                This project enforces strict <span className="text-foreground font-medium">Zero Technical Debt</span> policies.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2 text-muted-foreground text-sm">
+                  <Badge variant="outline" className="mt-0.5">Monorepo</Badge>
+                  <span>Managed with PNPM Workspaces.</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground text-sm">
+                  <Badge variant="outline" className="mt-0.5">Type Safety</Badge>
+                  <span>100% TypeScript. Shared types between DB and Web.</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground text-sm">
+                  <Badge variant="outline" className="mt-0.5">Migrations</Badge>
+                  <span>Manual SQL review process. No automatic schema drifts.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <footer className="mt-20 pt-8 border-t text-center text-muted-foreground text-sm">
+          <p>© 2025 Open Egypt Initiative. Open Source.</p>
+        </footer>
+      </div>
+    </div>
+  )
 }

@@ -37,6 +37,21 @@ Deno.serve(async (req) => {
 
     if (pError || !partner) throw new Error('Partner not found or unauthorized')
 
+    // Enforce 1 Key Limit for Free Tier
+    const requestedTier = tier || 'free'
+    if (requestedTier === 'free') {
+      const { count, error: countError } = await supabaseClient
+        .from('api_keys')
+        .select('*', { count: 'exact', head: true })
+        .eq('partner_id', partner.id)
+        .eq('is_revoked', false)
+      
+      if (countError) throw countError
+      if (count !== null && count >= 1) {
+        throw new Error('Free tier is limited to 1 active API Key. Please revoke your existing key to generate a new one.')
+      }
+    }
+
     // Generate Key
     const rawKey = `sk_live_${crypto.randomUUID().replace(/-/g, '')}`
     
@@ -55,7 +70,7 @@ Deno.serve(async (req) => {
         key_hash: hashHex,
         prefix: rawKey.substring(0, 8),
         tier_id: tier || 'free',
-        name: 'Default Key'
+        name: body.name || 'Default Key'
       })
 
     if (insertError) throw insertError

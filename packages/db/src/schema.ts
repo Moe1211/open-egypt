@@ -65,6 +65,12 @@ export const partners = openEgyptSchema.table('partners', {
   contactInfo: jsonb('contact_info'),
   ownerUserId: uuid('owner_user_id'), // Link to Supabase Auth User ID
   createdAt: timestamp('created_at').defaultNow(),
+  // Phase 2: Verification & Billing
+  tier: text('tier').default('free').notNull(),
+  subscriptionStatus: text('subscription_status').default('inactive'), // inactive, active, past_due, verification_pending
+  kycData: jsonb('kyc_data'),
+  billingEmail: text('billing_email'),
+  lastPaymentDate: timestamp('last_payment_date'),
 });
 
 export const apiKeys = openEgyptSchema.table('api_keys', {
@@ -86,8 +92,6 @@ export const apiUsage = openEgyptSchema.table('api_usage', {
 }, (table) => ({
   pk: primaryKey({ columns: [table.keyId, table.hourBucket] }),
 }));
-
-// -- Audit & Logs --
 
 // -- Audit & Logs --
 
