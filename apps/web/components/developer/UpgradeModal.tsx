@@ -22,6 +22,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -68,6 +69,21 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
       await onUpdatePartner({
         subscription_status: 'verification_pending',
       });
+      
+      // Notify Admin via Telegram
+      await supabase.functions.invoke('telegram-bot', {
+        body: {
+          action: 'notify_upgrade_request',
+          partnerId: partner.id,
+          partnerName: partner.name,
+          kycData: {
+            business_name: businessName,
+            website: website,
+            billing_email: billingEmail
+          }
+        }
+      });
+
       setStep('confirm');
     } catch (error) {
       toast.error('Failed to submit request');
