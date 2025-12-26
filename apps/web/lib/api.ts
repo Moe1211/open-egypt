@@ -24,7 +24,20 @@ export interface SearchParams {
   offset?: number
 }
 
+export interface Suggestion {
+  type: 'brand' | 'model'
+  label: string
+  label_ar?: string
+  value: string
+  meta?: {
+    logo?: string
+    brand?: string
+    brand_slug?: string
+  }
+}
+
 const EDGE_FUNCTION_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-car-prices`
+const AUTOCOMPLETE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/autocomplete`
 
 export async function searchCarPrices(params: SearchParams): Promise<CarPrice[]> {
   const query = new URLSearchParams()
@@ -51,6 +64,29 @@ export async function searchCarPrices(params: SearchParams): Promise<CarPrice[]>
     return json.data || []
   } catch (error) {
     console.error('Failed to fetch car prices:', error)
+    return []
+  }
+}
+
+export async function getSuggestions(q: string): Promise<Suggestion[]> {
+  if (!q.trim()) return []
+
+  try {
+    const res = await fetch(`${AUTOCOMPLETE_URL}?q=${encodeURIComponent(q)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!res.ok) {
+      throw new Error(`API Error: ${res.statusText}`)
+    }
+
+    const json = await res.json()
+    return json.suggestions || []
+  } catch (error) {
+    console.error('Failed to fetch suggestions:', error)
     return []
   }
 }

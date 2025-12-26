@@ -38,12 +38,37 @@ Data is sourced from publicly available listings and normalized into a consisten
 
 ## API Access
 
-### Base Endpoint
+### Base Endpoints
 
-```
+- **Search/Prices:** `/functions/v1/get-car-prices`
+- **Autocomplete:** `/functions/v1/autocomplete`
 
-/functions/v1/get-car-prices
+### Autocomplete API
 
+Provides real-time suggestions for brands and models.
+
+**Parameters:**
+- `q`: Search query (minimum 1 character)
+- `limit`: (Optional) Max number of results (default 10)
+
+**Response:**
+```json
+{
+  "suggestions": [
+    {
+      "type": "brand",
+      "label": "BMW",
+      "value": "bmw",
+      "meta": { "logo": "..." }
+    },
+    {
+      "type": "model",
+      "label": "BMW X5",
+      "value": "X5",
+      "meta": { "brand": "BMW", "brand_slug": "bmw" }
+    }
+  ]
+}
 ```
 
 ### Example Use Cases
