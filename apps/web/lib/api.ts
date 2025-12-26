@@ -36,8 +36,9 @@ export interface Suggestion {
   }
 }
 
-const EDGE_FUNCTION_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-car-prices`
-const AUTOCOMPLETE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/autocomplete`
+const EDGE_FUNCTION_URL = '/api/prices'
+// Now pointing to our own Next.js Proxy
+const AUTOCOMPLETE_URL = '/api/autocomplete'
 
 export async function searchCarPrices(params: SearchParams): Promise<CarPrice[]> {
   const query = new URLSearchParams()
