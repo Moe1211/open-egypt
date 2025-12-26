@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       // 1. Fetch all brands
       const { data: allBrands } = await supabase
         .from('brands')
-        .select('name_en, slug, name_ar')
+        .select('id, name_en, slug, name_ar')
       
       if (allBrands) {
         // Sort by length desc to prioritize "Land Rover" over "Land"
@@ -98,10 +98,6 @@ Deno.serve(async (req) => {
                remainder = remainder.replace(slugRegex, '')
              } else {
                 // Remove the matching token(s) if full name didn't match (Strategy C)
-                // This is a bit rough, but if we matched "Aud" for "Audi", we want to remove "Aud"
-                // We'll reconstruct remainder from tokens excluding the one that matched the brand
-                // But re-matching to find WHICH token matched is safer.
-                
                 const matchedToken = tokens.find(t => 
                    t.length >= 3 && (matchedBrand!.name_en.toLowerCase().startsWith(t) || matchedBrand!.slug.toLowerCase().startsWith(t))
                 )
@@ -114,8 +110,54 @@ Deno.serve(async (req) => {
           
           remainder = remainder.replace(/\s+/g, ' ').trim()
           
+          // Detect Model vs Variant in the remainder
           if (remainder.length > 0) {
-            filterModel = remainder
+            // Fetch models for this brand to distinguish Model from Variant
+            const { data: brandModels } = await supabase
+              .from('models')
+              .select('name_en')
+              .eq('brand_id', matchedBrand.id)
+
+            let matchedModelName = null
+
+            if (brandModels) {
+              // Sort by length desc to match "Land Cruiser" before "Land"
+              const sortedModels = brandModels.sort((a, b) => b.name_en.length - a.name_en.length)
+              
+              // Try to find the model name in the remainder
+              const remainderLower = remainder.toLowerCase()
+              const foundModel = sortedModels.find(m => {
+                const mName = m.name_en.toLowerCase()
+                // Check for exact word match to avoid "Corolla" matching "Corolla Cross" partially if logic was different
+                // But simple includes is often enough if sorted by length
+                return remainderLower.includes(mName)
+              })
+
+              if (foundModel) {
+                matchedModelName = foundModel.name_en
+              }
+            }
+
+            if (matchedModelName) {
+              filterModel = matchedModelName
+              
+              // Remove the model from remainder to get variant
+              const modelRegex = new RegExp(`\\b${matchedModelName}\\b`, 'i')
+              let variantRemainder = remainder.replace(modelRegex, '')
+              
+              // If regex failed (e.g. slight formatting diff), try simple replace
+              if (variantRemainder === remainder) {
+                 variantRemainder = remainder.replace(matchedModelName.toLowerCase(), '') // fallback
+              }
+
+              filterVariant = variantRemainder.replace(/\s+/g, ' ').trim()
+              if (filterVariant.length === 0) filterVariant = null // Cleanup
+            } else {
+              // No model matched from DB list. 
+              // Fallback: Assume the entire remainder is the model (legacy behavior)
+              // OR: We could try to guess? But safer to assume Model.
+              filterModel = remainder
+            }
           }
         } else {
           // No brand matched, assume it's a model search
