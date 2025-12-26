@@ -16,6 +16,7 @@ Deno.serve(async (req) => {
     const q = url.searchParams.get('q')?.trim()
     const brandParam = url.searchParams.get('brand') // Partial match on Name or Slug
     const modelParam = url.searchParams.get('model') // Partial match on Name
+    const variantParam = url.searchParams.get('variant') // Partial match on Name
     const year = url.searchParams.get('year')   // Exact match
     const limit = parseInt(url.searchParams.get('limit') || '20')
     const offset = parseInt(url.searchParams.get('offset') || '0')
@@ -30,6 +31,7 @@ Deno.serve(async (req) => {
 
     let filterBrand = brandParam
     let filterModel = modelParam
+    let filterVariant = variantParam
 
     // Smart Search Logic
     if (q && !brandParam && !modelParam) {
@@ -164,6 +166,11 @@ Deno.serve(async (req) => {
       query = query.ilike('variant.model.name_en', `%${filterModel}%`)
     }
 
+    if (filterVariant) {
+      // Partial match on Variant English Name
+      query = query.ilike('variant.name_en', `%${filterVariant}%`)
+    }
+
     if (year) {
       query = query.eq('year_model', year)
     }
@@ -204,7 +211,7 @@ Deno.serve(async (req) => {
         limit,
         offset,
         count: flatData.length,
-        filters: { q, brand: filterBrand, model: filterModel, year }
+        filters: { q, brand: filterBrand, model: filterModel, variant: filterVariant, year }
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
