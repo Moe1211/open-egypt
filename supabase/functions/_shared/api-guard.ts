@@ -26,7 +26,8 @@ export async function guardApiKey(req: Request): Promise<GuardResult> {
   }
 
   const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false }
+    auth: { persistSession: false },
+    db: { schema: 'open_egypt' }
   })
 
   // Hash the key (SHA-256)
