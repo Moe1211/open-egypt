@@ -17,7 +17,7 @@ export default function QuickDocs({ apiKey }: { apiKey?: string }) {
           <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Get All Brands</h4>
           <div className="bg-black p-4 rounded border border-gray-800 font-mono text-xs overflow-x-auto text-green-400">
             curl -X GET '{process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-car-prices?brands=true' \<br/>
-            &nbsp;&nbsp;-H 'Authorization: Bearer {key}'
+            &nbsp;&nbsp;-H 'x-api-key:{key}'
           </div>
         </div>
 
@@ -25,7 +25,7 @@ export default function QuickDocs({ apiKey }: { apiKey?: string }) {
           <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Search Models</h4>
           <div className="bg-black p-4 rounded border border-gray-800 font-mono text-xs overflow-x-auto text-blue-400">
             curl -X GET '{process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-car-prices?brand=BMW&year=2024' \<br/>
-            &nbsp;&nbsp;-H 'Authorization: Bearer {key}'
+            &nbsp;&nbsp;-H 'x-api-key:{key}'
           </div>
         </div>
       </div>

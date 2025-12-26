@@ -193,13 +193,13 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => copyToClipboard('01012345678')}
+                      onClick={() => copyToClipboard('01022614423')}
                       className="h-8 w-8 p-0 text-zinc-500 hover:text-white"
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </Button>
                   </div>
-                  <code className="text-sm text-primary font-mono">01012345678</code>
+                  <code className="text-sm text-primary font-mono">01022614423</code>
                 </div>
                 
                 <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800">
@@ -208,13 +208,13 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => copyToClipboard('openegypt@instapay')}
+                      onClick={() => copyToClipboard('ibrahim.moe@instapay')}
                       className="h-8 w-8 p-0 text-zinc-500 hover:text-white"
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </Button>
                   </div>
-                  <code className="text-sm text-primary font-mono">openegypt@instapay</code>
+                  <code className="text-sm text-primary font-mono">ibrahim.moe@instapay</code>
                 </div>
               </div>
 

@@ -214,7 +214,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 <div className="bg-black/50 border border-zinc-800 p-3 rounded-lg overflow-x-auto">
                   <pre className="text-xs text-zinc-400 font-mono">
 {`curl -X GET "https://api.openegy.com/v1/get-car-prices" \
-  -H "Authorization: Bearer ${apiKey}"`}
+  -H "x-api-key:${apiKey}"`}
                   </pre>
                 </div>
               </div>

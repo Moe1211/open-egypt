@@ -51,7 +51,7 @@ export function DocsTab() {
           <div className="p-4 rounded-lg bg-black/50 border border-zinc-800 font-mono text-sm overflow-x-auto">
             <pre className="text-zinc-300">
 {`curl -X GET "https://api.openegy.com/v1/get-car-prices" \
-  -H "Authorization: Bearer YOUR_API_KEY"`}
+  -H "x-api-key:YOUR_API_KEY"`}
             </pre>
           </div>
           <p className="text-sm text-zinc-400">

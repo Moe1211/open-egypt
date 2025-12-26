@@ -205,7 +205,7 @@ export default function Wizard({ user, onComplete }: WizardProps) {
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-x-auto">
             <code className="text-sm font-mono text-gray-800 whitespace-pre">
 {`curl -X GET '${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-car-prices' \
-  -H 'Authorization: Bearer ${apiKey}'`}
+  -H 'x-api-key:${apiKey}'`}
             </code>
           </div>
 
