@@ -38,10 +38,11 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
   const [businessName, setBusinessName] = useState(partner.kyc_data?.business_name || '');
   const [website, setWebsite] = useState(partner.kyc_data?.website || '');
   const [billingEmail, setBillingEmail] = useState(partner.kyc_data?.billing_email || '');
+  const [phoneNumber, setPhoneNumber] = useState(partner.phone_number || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleKycSubmit = async () => {
-    if (!businessName.trim() || !billingEmail.trim()) {
+    if (!businessName.trim() || !billingEmail.trim() || !phoneNumber.trim()) {
       toast.error('Please fill in required fields');
       return;
     }
@@ -49,6 +50,7 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
     setIsSubmitting(true);
     try {
       await onUpdatePartner({
+        phone_number: phoneNumber.trim(),
         kyc_data: {
           business_name: businessName.trim(),
           website: website.trim(),
@@ -79,7 +81,8 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
           kycData: {
             business_name: businessName,
             website: website,
-            billing_email: billingEmail
+            billing_email: billingEmail,
+            phone_number: phoneNumber
           }
         }
       });
@@ -182,6 +185,18 @@ export function UpgradeModal({ open, onOpenChange, partner, onUpdatePartner }: U
                 value={billingEmail}
                 onChange={(e) => setBillingEmail(e.target.value)}
                 placeholder="billing@yoursite.com"
+                className="bg-zinc-950 border-zinc-800 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" className="text-zinc-300">Phone Number *</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+20 1xxxxxxxxx"
                 className="bg-zinc-950 border-zinc-800 text-white"
               />
             </div>

@@ -70,6 +70,7 @@ export const partners = openEgyptSchema.table('partners', {
   subscriptionStatus: text('subscription_status').default('inactive'), // inactive, active, past_due, verification_pending
   kycData: jsonb('kyc_data'),
   billingEmail: text('billing_email'),
+  phoneNumber: text('phone_number'),
   lastPaymentDate: timestamp('last_payment_date'),
 });
 

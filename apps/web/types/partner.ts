@@ -11,6 +11,7 @@ export interface Partner {
     website?: string;
     billing_email?: string;
   };
+  phone_number?: string;
   use_case?: string;
   created_at: string;
 }

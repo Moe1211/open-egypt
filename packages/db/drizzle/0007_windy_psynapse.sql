@@ -1,0 +1,1 @@
+ALTER TABLE "open_egypt"."partners" ADD COLUMN "phone_number" text;
