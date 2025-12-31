@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import SearchClient from '../search-client';
+import PriceChangeLogs from '@/components/price-change-logs';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -76,6 +77,10 @@ export default async function PricesPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section style={{ marginTop: '4rem' }}>
+        <PriceChangeLogs />
       </section>
     </main>
   );
