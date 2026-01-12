@@ -1,0 +1,196 @@
+# Open Egypt - Car Prices API
+
+## What is Open Egypt?
+
+Open Egypt is a free, open-source API that provides access to car prices in Egypt. Instead of manually searching websites or scraping data, developers can use our API to get structured, reliable car price information.
+
+**Perfect for**: Building car comparison apps, price tracking tools, market research dashboards, or any app that needs Egyptian car market data.
+
+## What You Can Do
+
+### 🔍 Search Car Prices
+- Find prices by brand (BMW, Toyota, Mercedes, etc.)
+- Search by model (Camry, Civic, X5, etc.)
+- Filter by year and specific variants
+- Get both English and Arabic names
+
+### 💡 Smart Search
+- Type natural language queries like "bmw x5 2024"
+- No need to know exact brand/model names
+- Works with partial matches and typos
+
+### 📊 Get Real Data
+- Official dealership prices
+- Market average prices
+- Historical price changes
+- Confidence scores for data reliability
+
+## Quick Examples
+
+### Find BMW X5 Prices
+```
+GET /functions/v1/get-car-prices?q=bmw x5
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "price": "3,500,000",
+      "currency": "EGP",
+      "year": 2024,
+      "brand": "BMW",
+      "brand_ar": "بي إم دبليو",
+      "model": "X5",
+      "model_ar": "إكس 5",
+      "variant": "xDrive40i",
+      "type": "OFFICIAL"
+    }
+  ]
+}
+```
+
+### Search with Autocomplete
+```
+GET /functions/v1/autocomplete?q=toy
+```
+
+**Response:**
+```json
+{
+  "suggestions": [
+    {
+      "type": "brand",
+      "label": "Toyota",
+      "label_ar": "تويوتا",
+      "value": "toyota"
+    },
+    {
+      "type": "model",
+      "label": "Toyota Camry",
+      "value": "Camry"
+    }
+  ]
+}
+```
+
+## API Endpoints
+
+### `/get-car-prices` - Search Car Prices
+**What it does**: Main search for car price data
+
+**Parameters**:
+- `q` - Smart search (e.g., "bmw x5", "toyota camry")
+- `brand` - Filter by brand (e.g., "bmw", "toyota")
+- `model` - Filter by model (e.g., "X5", "Camry")
+- `year` - Filter by year (e.g., "2024")
+- `limit` - How many results (default: 20)
+- `offset` - Skip results for pagination
+
+### `/autocomplete` - Get Search Suggestions
+**What it does**: Real-time suggestions as you type
+
+**Parameters**:
+- `q` - What you're typing (minimum 1 character)
+- `limit` - Max suggestions (default: 10)
+
+## How to Use
+
+### For Developers
+```javascript
+// Search for car prices
+const response = await fetch('https://[project].supabase.co/functions/v1/get-car-prices?q=bmw');
+const data = await response.json();
+
+// Get autocomplete suggestions
+const suggestions = await fetch('https://[project].supabase.co/functions/v1/autocomplete?q=toy');
+const results = await suggestions.json();
+```
+
+### For Non-Technical Users
+You can use tools like Postman, curl, or any HTTP client:
+
+```bash
+# Search for Toyota cars
+curl "https://[project].supabase.co/functions/v1/get-car-prices?q=toyota"
+
+# Get suggestions for "merc"
+curl "https://[project].supabase.co/functions/v1/autocomplete?q=merc"
+```
+
+## Data Coverage
+
+**Brands**: 50+ car brands including BMW, Mercedes, Toyota, Honda, Hyundai, Kia, Nissan, Volkswagen, and many more
+
+**Models**: Thousands of car models with English and Arabic names
+
+**Price Types**:
+- OFFICIAL: Dealership prices
+- MARKET_AVG: Average market prices
+- Other types as available
+
+**Languages**: Both English and Arabic support
+
+## Rate Limits & Access
+
+**Free Access**:
+- No API key needed for basic usage
+- Rate limited to ensure fair access
+- Public and open to everyone
+
+**Higher Limits**:
+- Partner program available for higher usage
+- API keys for commercial applications
+- Contact us for partnership details
+
+## Use Cases & Ideas
+
+### 🚗 Car Comparison Apps
+Build apps that help users compare prices across brands and models
+
+### 📈 Market Research
+Track price trends and analyze the Egyptian car market
+
+### 🏪 Dealership Tools
+Help dealerships monitor competitor pricing
+
+### 📱 Consumer Apps
+Price checking features for car buying/selling apps
+
+### 📊 Dashboards
+Real-time price monitoring and analytics
+
+## Data Quality
+
+**Source**: Publicly available pricing from official dealerships and verified sources
+
+**Updates**: Regular data updates to keep prices current
+
+**Verification**: Confidence scores and source tracking
+
+**History**: Price change tracking over time
+
+## Support & Community
+
+**Documentation**: Full API docs available at [website]
+
+**Examples**: Code samples in JavaScript, Python, and other languages
+
+**Community**: Open-source project - contribute or report issues
+
+**Contact**: Questions? Open an issue on GitHub
+
+## About Open Egypt
+
+**Mission**: Make Egyptian public data accessible and useful
+
+**Why?**: No more manual scraping or unreliable data sources
+
+**Open Source**: MIT licensed, transparent, and community-driven
+
+**Future**: More Egyptian datasets coming soon
+
+---
+
+*Ready to build something amazing with Egyptian car data? Start with our API today!*
